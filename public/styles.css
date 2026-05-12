@@ -22,7 +22,8 @@
 body {
   margin: 0;
   min-height: 100vh;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   background:
     radial-gradient(circle at 12% 42%, rgba(128, 19, 28, 0.45), transparent 34%),
     linear-gradient(110deg, #22080c 0%, #0f1012 42%, #090a0c 100%);
@@ -54,12 +55,19 @@ a {
 
 .app-shell {
   width: min(100vw, 1200px);
-  height: 100vh;
+  min-height: 100vh;
   margin: 0 auto;
   position: relative;
   display: grid;
   place-items: stretch center;
   padding: 32px;
+}
+
+.app-shell.is-detail {
+  width: min(100vw, 1380px);
+  height: auto;
+  align-items: start;
+  padding-bottom: 84px;
 }
 
 .search-view {
@@ -236,7 +244,8 @@ a:focus-visible {
 
 .detail-view {
   width: min(1120px, 94vw);
-  height: min(650px, calc(100vh - 42px));
+  min-height: calc(100vh - 64px);
+  height: auto;
   position: relative;
 }
 
@@ -329,7 +338,8 @@ a:focus-visible {
 }
 
 .detail-content {
-  height: 100%;
+  min-height: calc(100vh - 96px);
+  height: auto;
   display: grid;
   place-items: center;
   padding-top: 48px;
@@ -337,9 +347,10 @@ a:focus-visible {
 
 .detail-grid {
   width: 100%;
-  height: 100%;
+  min-height: min(650px, calc(100vh - 130px));
+  height: auto;
   display: grid;
-  grid-template-columns: 210px minmax(0, 1fr) 310px;
+  grid-template-columns: 230px minmax(0, 1fr) 330px;
   gap: 22px;
   align-items: center;
 }
@@ -369,9 +380,10 @@ a:focus-visible {
 .metadata-panel h2,
 .detail-loading h2 {
   margin: 0;
-  font-size: clamp(2.6rem, 6vw, 5.8rem);
+  font-size: clamp(2.6rem, 5.4vw, 5.2rem);
   line-height: 0.95;
   letter-spacing: 0;
+  overflow-wrap: anywhere;
 }
 
 .meta-row {
