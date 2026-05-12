@@ -21,6 +21,8 @@ let countries = [];
 let selectedCountries = new Set();
 let currentController = null;
 let currentItem = null;
+let currentPosters = [];
+let currentPosterIndex = 0;
 let searchTimer = 0;
 
 function setStatus(message, tone = "") {
@@ -170,12 +172,15 @@ function renderAvailability(payload) {
   const rating = meta.imdbScore
     ? `${meta.imdbScore}/10 <a href="${escapeHtml(imdbUrl)}" target="_blank" rel="noreferrer">IMDb</a>${meta.imdbVotes ? ` (${compactNumber(meta.imdbVotes)})` : ""}`
     : `<a href="${escapeHtml(imdbUrl)}" target="_blank" rel="noreferrer">IMDb</a> score unavailable`;
+  currentPosters = Array.isArray(meta.posters) && meta.posters.length ? meta.posters : [meta.poster].filter(Boolean);
+  currentPosterIndex = 0;
+  const canCyclePoster = currentPosters.length > 1;
 
   detailContent.innerHTML = `
     <div class="detail-grid">
-      <div class="poster-shell">
-        ${meta.poster ? `<img src="${escapeHtml(meta.poster)}" alt="">` : ""}
-      </div>
+      <button class="poster-shell poster-button" type="button" ${canCyclePoster ? "" : "disabled"} aria-label="${canCyclePoster ? "Show next cover" : "Cover"}">
+        ${currentPosters[0] ? `<img id="detail-poster" src="${escapeHtml(currentPosters[0])}" alt="">` : ""}
+      </button>
       <section class="metadata-panel">
         <span class="eyebrow">${regions.length ? "Available on Netflix" : "No Netflix hit"}</span>
         <h2><a href="${escapeHtml(justWatchUrl)}" target="_blank" rel="noreferrer">${escapeHtml(meta.title || payload.selected.title)}</a></h2>
@@ -290,6 +295,14 @@ disclaimerButton.addEventListener("click", () => {
 
 closeDisclaimer.addEventListener("click", () => {
   disclaimerDialog.close();
+});
+
+detailContent.addEventListener("click", (event) => {
+  const posterButton = event.target.closest(".poster-button");
+  if (!posterButton || currentPosters.length < 2) return;
+  currentPosterIndex = (currentPosterIndex + 1) % currentPosters.length;
+  const image = document.querySelector("#detail-poster");
+  if (image) image.src = currentPosters[currentPosterIndex];
 });
 
 loadCountries().catch((error) => setStatus(error.message, "warn"));

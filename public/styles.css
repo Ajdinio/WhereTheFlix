@@ -362,6 +362,20 @@ a:focus-visible {
   border-radius: 5px;
   background: #11161b;
   border: 1px solid var(--line);
+  padding: 0;
+}
+
+.poster-button {
+  display: block;
+  color: inherit;
+}
+
+.poster-button:not(:disabled):hover {
+  border-color: var(--red);
+}
+
+.poster-button:disabled {
+  cursor: default;
 }
 
 .metadata-panel {
@@ -397,6 +411,9 @@ a:focus-visible {
 .facts strong a:hover,
 .data-credit a:hover {
   color: var(--red);
+  text-decoration: underline;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.12em;
 }
 
 .meta-row {

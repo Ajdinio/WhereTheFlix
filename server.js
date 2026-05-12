@@ -201,14 +201,29 @@ function imageUrl(path, profile = "s718") {
   return `https://images.justwatch.com${path.replace("{profile}", profile).replace("{format}", "jpg")}`;
 }
 
+function uniqueImages(values) {
+  const seen = new Set();
+  return values
+    .filter(Boolean)
+    .map((value) => String(value).trim())
+    .filter((value) => {
+      const key = value.replace(/\._V1_.*(?=\.)/, "").toLowerCase();
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+}
+
 function contentMetadata(state, content, selected) {
   if (!content) {
+    const posters = uniqueImages([selected.image]);
     return {
       title: selected.title,
       year: selected.year,
       type: selected.type,
       cast: selected.cast || "",
-      poster: selected.image || ""
+      poster: selected.image || "",
+      posters
     };
   }
 
@@ -226,6 +241,7 @@ function contentMetadata(state, content, selected) {
     .filter(Boolean)
     .slice(0, 3);
   const poster = imageUrl(content['posterUrl({"format":"JPG","profile":"S718"})'] || content.posterUrl) || selected.image || "";
+  const posters = uniqueImages([poster, selected.image]);
 
   return {
     title: content.title || selected.title,
@@ -242,6 +258,7 @@ function contentMetadata(state, content, selected) {
     imdbVotes: scoring.imdbVotes || null,
     tomatoMeter: scoring.tomatoMeter || null,
     poster,
+    posters,
     fullPath: content.fullPath || ""
   };
 }
