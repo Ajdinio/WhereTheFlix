@@ -521,6 +521,15 @@ a:focus-visible {
   display: none;
 }
 
+.version-counter {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  z-index: 3;
+  color: rgba(245, 240, 235, 0.28);
+  font-size: 0.82rem;
+}
+
 .site-footer a {
   color: rgba(245, 240, 235, 0.42);
   text-decoration: none;
