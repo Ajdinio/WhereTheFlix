@@ -1,22 +1,20 @@
 # WhereTheFlix
 
-Eine kleine Info-App, die einen IMDb-Titel sucht und live prueft, in welchen Netflix-Regionen der Titel laut regionalen JustWatch-Katalogseiten verfuegbar ist.
+WhereTheFlix is an independent informational web app for checking where a movie or TV show appears to be available on Netflix by region.
 
-## Start
+Users can search for a title, select the matching IMDb result, and view a focused detail screen with title metadata, cast, runtime, ratings, and detected Netflix regions.
 
-```powershell
-npm.cmd run dev
-```
+## Data Sources
 
-Danach im Browser oeffnen:
+- IMDb Suggestions are used for title search and basic title metadata.
+- JustWatch regional catalog pages are used to infer streaming availability by country.
 
-```text
-http://localhost:3000
-```
+Availability may change frequently and can vary by account, subscription plan, device, language, and physical location.
 
-## Datenquellen
+## Legal Notice
 
-- IMDb Suggestions: Titel, IMDb-ID, Jahr, Poster und Basismetadaten.
-- JustWatch-Webseiten: regionale Streaming-Angebote aus dem serverseitig gerenderten Apollo-State.
+WhereTheFlix is not affiliated with, endorsed by, or sponsored by Netflix, IMDb, JustWatch, or any streaming provider.
 
-Netflix selbst wird nicht direkt gescraped, weil Netflix keine oeffentliche Katalog-API anbietet und direkte Abfragen stark von Login, Region und Bot-Schutz abhaengen.
+All trademarks, logos, and brand names are the property of their respective owners.
+
+This project does not provide access to streaming content, bypass geographic restrictions, or encourage users to violate any streaming platform's terms of service.
