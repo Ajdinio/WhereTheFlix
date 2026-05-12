@@ -148,6 +148,15 @@ function regionSummary(regions) {
   return `${names.slice(0, 8).join(", ")} +${names.length - 8} more`;
 }
 
+function imdbTitleUrl(imdbId) {
+  return imdbId ? `https://www.imdb.com/title/${encodeURIComponent(imdbId)}/` : "https://www.imdb.com/";
+}
+
+function justWatchTitleUrl(meta, regions) {
+  if (meta.fullPath) return `https://www.justwatch.com${meta.fullPath}`;
+  return regions[0]?.sourceUrl || "https://www.justwatch.com/";
+}
+
 function renderAvailability(payload) {
   const regions = payload.available || [];
   const errors = payload.errors || [];
@@ -156,7 +165,11 @@ function renderAvailability(payload) {
     dateStyle: "medium",
     timeStyle: "short"
   });
-  const rating = meta.imdbScore ? `${meta.imdbScore}/10 IMDb${meta.imdbVotes ? ` (${compactNumber(meta.imdbVotes)})` : ""}` : "IMDb score unavailable";
+  const imdbUrl = imdbTitleUrl(payload.selected?.imdbId);
+  const justWatchUrl = justWatchTitleUrl(meta, regions);
+  const rating = meta.imdbScore
+    ? `${meta.imdbScore}/10 <a href="${escapeHtml(imdbUrl)}" target="_blank" rel="noreferrer">IMDb</a>${meta.imdbVotes ? ` (${compactNumber(meta.imdbVotes)})` : ""}`
+    : `<a href="${escapeHtml(imdbUrl)}" target="_blank" rel="noreferrer">IMDb</a> score unavailable`;
 
   detailContent.innerHTML = `
     <div class="detail-grid">
@@ -165,14 +178,14 @@ function renderAvailability(payload) {
       </div>
       <section class="metadata-panel">
         <span class="eyebrow">${regions.length ? "Available on Netflix" : "No Netflix hit"}</span>
-        <h2>${escapeHtml(meta.title || payload.selected.title)}</h2>
+        <h2><a href="${escapeHtml(justWatchUrl)}" target="_blank" rel="noreferrer">${escapeHtml(meta.title || payload.selected.title)}</a></h2>
         <div class="meta-row">${renderMetaList(meta)}</div>
         <p class="description">${escapeHtml(meta.description || "No description found in the regional catalog metadata.")}</p>
         <div class="facts">
           <div><span>Cast</span><strong>${escapeHtml(meta.cast || "Unknown")}</strong></div>
           <div><span>Director</span><strong>${escapeHtml(meta.directors || "Unknown")}</strong></div>
           <div><span>Genre</span><strong>${escapeHtml((meta.genres || []).join(", ") || "Unknown")}</strong></div>
-          <div><span>Rating</span><strong>${escapeHtml(rating)}</strong></div>
+          <div><span>Rating</span><strong>${rating}</strong></div>
         </div>
       </section>
       <aside class="availability-card">
@@ -183,7 +196,7 @@ function renderAvailability(payload) {
           ${regions.slice(0, 12).map((region) => `<a href="${escapeHtml(region.sourceUrl)}" target="_blank" rel="noreferrer">${escapeHtml(region.flag)} ${escapeHtml(region.name)}</a>`).join("")}
         </div>
         <small>${payload.checked} / ${payload.total} checked · ${checkedAt}${errors.length ? ` · ${errors.length} failed` : ""}</small>
-        <small class="data-credit">Data provided by IMDb and JustWatch. Netflix availability inferred from regional catalog pages.</small>
+        <small class="data-credit">Data provided by <a href="https://www.imdb.com/" target="_blank" rel="noreferrer">IMDb</a> and <a href="https://www.justwatch.com/" target="_blank" rel="noreferrer">JustWatch</a>. Netflix availability inferred from regional catalog pages.</small>
       </aside>
     </div>
   `;

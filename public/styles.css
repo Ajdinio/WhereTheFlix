@@ -386,6 +386,19 @@ a:focus-visible {
   overflow-wrap: anywhere;
 }
 
+.metadata-panel h2 a,
+.facts strong a,
+.data-credit a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.metadata-panel h2 a:hover,
+.facts strong a:hover,
+.data-credit a:hover {
+  color: var(--red);
+}
+
 .meta-row {
   display: flex;
   flex-wrap: wrap;
