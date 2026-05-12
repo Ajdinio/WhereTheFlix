@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>WhereTheFlix</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="app-shell" id="app-shell">
+      <section class="search-view" id="search-view" aria-labelledby="page-title">
+        <h1 id="page-title">Where The Flix?</h1>
+        <form id="search-form" class="search-form">
+          <label class="visually-hidden" for="title-input">Filmtitel oder Serie</label>
+          <div class="search-field">
+            <span class="search-icon" aria-hidden="true"></span>
+            <input id="title-input" name="q" type="search" autocomplete="off" placeholder="search through EVERY region..." minlength="2" required>
+          </div>
+        </form>
+        <div id="status" class="status" role="status"></div>
+        <div id="results" class="results" aria-live="polite"></div>
+      </section>
+
+      <section class="detail-view" id="detail-view" aria-live="polite" hidden>
+        <button id="back-button" class="back-button" type="button" aria-label="Zur Suche">Back</button>
+        <div id="detail-content" class="detail-content"></div>
+        <div class="region-menu">
+          <button id="region-toggle" class="region-toggle" type="button" aria-expanded="false">Regions</button>
+          <div id="region-drawer" class="region-drawer" hidden>
+            <div class="drawer-heading">
+              <span id="scan-summary">All regions selected</span>
+              <button id="select-all" type="button">None</button>
+            </div>
+            <div id="country-grid" class="country-grid"></div>
+            <button id="rescan-button" class="rescan-button" type="button">Refresh scan</button>
+          </div>
+        </div>
+      </section>
+
+      <footer class="site-footer">
+        <span>created by <a href="https://github.com/Ajdinio" target="_blank" rel="noreferrer">Ajdinio</a></span>
+        <button id="disclaimer-button" type="button">legal</button>
+      </footer>
+
+      <dialog id="disclaimer-dialog" class="disclaimer-dialog">
+        <button id="close-disclaimer" class="close-disclaimer" type="button" aria-label="Close disclaimer">Close</button>
+        <h2>Legal</h2>
+        <p>WhereTheFlix is an independent informational tool and is not affiliated with, endorsed by, or sponsored by Netflix, IMDb, JustWatch, or any streaming provider.</p>
+        <p>Streaming availability is inferred from third-party sources and may be incomplete, outdated, or vary by account, plan, device, language, and location.</p>
+        <p>This service does not provide access to content, bypass regional restrictions, or advise users to violate streaming platform terms. All trademarks and brand names belong to their respective owners.</p>
+      </dialog>
+    </main>
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>
