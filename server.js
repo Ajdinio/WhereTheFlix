@@ -207,11 +207,45 @@ function uniqueImages(values) {
     .filter(Boolean)
     .map((value) => String(value).trim())
     .filter((value) => {
-      const key = value.replace(/\._V1_.*(?=\.)/, "").toLowerCase();
+      const key = value
+        .replace(/\._V1_.*(?=\.)/, "")
+        .replace(/\/poster\/(\d+)\/[^/]+\//i, "/poster/$1/")
+        .toLowerCase();
       if (!key || seen.has(key)) return false;
       seen.add(key);
       return true;
     });
+}
+
+function collectPosterUrls(state, node, depth = 0, seenRefs = new Set()) {
+  if (!node || depth > 4) return [];
+
+  if (typeof node === "string") return [];
+
+  if (Array.isArray(node)) {
+    return node.flatMap((value) => collectPosterUrls(state, value, depth + 1, seenRefs));
+  }
+
+  if (node.type === "id" && node.id) {
+    if (seenRefs.has(node.id)) return [];
+    seenRefs.add(node.id);
+    return collectPosterUrls(state, state?.[node.id], depth + 1, seenRefs);
+  }
+
+  if (typeof node !== "object") return [];
+
+  const urls = [];
+  for (const [key, value] of Object.entries(node)) {
+    const lowerKey = key.toLowerCase();
+    if (lowerKey.includes("poster") && typeof value === "string") {
+      urls.push(imageUrl(value));
+      continue;
+    }
+    if (value && (typeof value === "object" || Array.isArray(value))) {
+      urls.push(...collectPosterUrls(state, value, depth + 1, seenRefs));
+    }
+  }
+  return urls;
 }
 
 function contentMetadata(state, content, selected) {
@@ -241,7 +275,7 @@ function contentMetadata(state, content, selected) {
     .filter(Boolean)
     .slice(0, 3);
   const poster = imageUrl(content['posterUrl({"format":"JPG","profile":"S718"})'] || content.posterUrl) || selected.image || "";
-  const posters = uniqueImages([poster, selected.image]);
+  const posters = uniqueImages([poster, ...collectPosterUrls(state, content), selected.image]);
 
   return {
     title: content.title || selected.title,
