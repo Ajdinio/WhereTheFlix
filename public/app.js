@@ -25,6 +25,10 @@ let currentPosters = [];
 let currentPosterIndex = 0;
 let searchTimer = 0;
 
+window.setTimeout(() => {
+  appShell.classList.remove("tooltip-active");
+}, 5000);
+
 function setStatus(message, tone = "") {
   statusEl.textContent = message;
   statusEl.dataset.tone = tone;

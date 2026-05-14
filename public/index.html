@@ -12,9 +12,9 @@
     <link rel="stylesheet" href="/styles.css">
   </head>
   <body>
-    <main class="app-shell" id="app-shell">
+    <main class="app-shell tooltip-active" id="app-shell">
       <section class="search-view" id="search-view" aria-labelledby="page-title">
-        <h1 id="page-title">Where The Flix?</h1>
+        <h1 id="page-title" aria-label="Where The Flix?">Where The Flix<span class="logo-question-wrap"><span class="logo-question" aria-describedby="logo-tooltip">?</span><span id="logo-tooltip" class="logo-tooltip" role="tooltip">WhereTheFlix helps you check whether a movie or show is available across Netflix regions, beyond your local region lock, so you can see where the title exists even when it does not appear in your own catalog.</span></span></h1>
         <form id="search-form" class="search-form">
           <label class="visually-hidden" for="title-input">Filmtitel oder Serie</label>
           <div class="search-field">
