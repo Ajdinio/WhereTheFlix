@@ -26,8 +26,8 @@ let currentPosterIndex = 0;
 let searchTimer = 0;
 
 window.setTimeout(() => {
-  appShell.classList.remove("tooltip-active");
-}, 5000);
+  appShell.classList.remove("pulse-active");
+}, 15000);
 
 function setStatus(message, tone = "") {
   statusEl.textContent = message;

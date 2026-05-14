@@ -97,6 +97,9 @@ h1 {
 
 .logo-question {
   display: inline-block;
+}
+
+.pulse-active .logo-question {
   animation: questionPulse 6s ease-in-out infinite;
 }
 
@@ -137,7 +140,7 @@ h1 {
   transform: translate(-50%, -50%) rotate(45deg);
 }
 
-.tooltip-active .logo-question-wrap:hover .logo-tooltip {
+.logo-question-wrap:hover .logo-tooltip {
   opacity: 1;
   visibility: visible;
   transform: translateX(-50%) translateY(0);
