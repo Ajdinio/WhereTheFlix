@@ -38,6 +38,82 @@ const COUNTRIES = [
   { code: "be", country: "BE", name: "Belgium", locale: "fr_BE", language: "fr", searchPath: "recherche", flag: "BE" }
 ];
 
+const SERVICES = [
+  {
+    id: "netflix",
+    name: "Netflix",
+    accent: "#ff2338",
+    accentRgb: "255, 35, 56",
+    terms: ["netflix", "nfx", "nfa", "netflixbasicwithads"]
+  },
+  {
+    id: "disney",
+    name: "Disney+",
+    accent: "#196A7B",
+    accentRgb: "25, 106, 123",
+    terms: ["disney", "dnp"]
+  },
+  {
+    id: "prime",
+    name: "Prime Video",
+    accent: "#0779FF",
+    accentRgb: "7, 121, 255",
+    terms: ["amazon prime", "prime video", "amazonprime", "amp"]
+  },
+  {
+    id: "hulu",
+    name: "Hulu",
+    accent: "#1CE783",
+    accentRgb: "28, 231, 131",
+    terms: ["hulu"]
+  },
+  {
+    id: "max",
+    name: "Max",
+    accent: "#6B38FF",
+    accentRgb: "107, 56, 255",
+    terms: ["max", "hbo max", "hbomax"]
+  },
+  {
+    id: "apple",
+    name: "Apple TV+",
+    accent: "#A7ADB4",
+    accentRgb: "167, 173, 180",
+    terms: ["apple tv plus", "apple tv+", "appletvplus"]
+  },
+  {
+    id: "crunchyroll",
+    name: "Crunchyroll",
+    accent: "#F47521",
+    accentRgb: "244, 117, 33",
+    terms: ["crunchyroll", "cru"]
+  },
+  {
+    id: "paramount",
+    name: "Paramount+",
+    accent: "#0064FF",
+    accentRgb: "0, 100, 255",
+    terms: ["paramount", "pmp"]
+  },
+  {
+    id: "peacock",
+    name: "Peacock",
+    accent: "#FCCC12",
+    accentRgb: "252, 204, 18",
+    terms: ["peacock"]
+  },
+  {
+    id: "mubi",
+    name: "MUBI",
+    accent: "#E6C95C",
+    accentRgb: "230, 201, 92",
+    terms: ["mubi"]
+  }
+];
+
+const DEFAULT_SERVICE = SERVICES[0];
+const ALTERNATIVE_SERVICES = SERVICES.filter((service) => service.id !== DEFAULT_SERVICE.id);
+
 const contentTypes = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
@@ -56,6 +132,19 @@ function json(res, status, payload) {
 
 function cleanQuery(value) {
   return String(value || "").replace(/\s+/g, " ").trim().slice(0, 120);
+}
+
+function publicService(service) {
+  return {
+    id: service.id,
+    name: service.name,
+    accent: service.accent,
+    accentRgb: service.accentRgb
+  };
+}
+
+function serviceById(id) {
+  return SERVICES.find((service) => service.id === id) || DEFAULT_SERVICE;
 }
 
 function cacheGet(key) {
@@ -380,24 +469,24 @@ function collectOfferRefs(object) {
   return [...refs.values()];
 }
 
-function isNetflixPackage(pkg) {
+function isServicePackage(pkg, service) {
   const haystack = [pkg?.clearName, pkg?.technicalName, pkg?.shortName]
     .filter(Boolean)
     .join(" ")
     .toLowerCase();
-  return haystack.includes("netflix") || haystack.includes("nfx") || haystack.includes("nfa");
+  return service.terms.some((term) => haystack.includes(term));
 }
 
-function netflixOffersFor(state, object) {
+function offersForService(state, object, service) {
   const offerRefs = collectOfferRefs(object);
   const offers = [];
   for (const ref of offerRefs) {
     const offer = state[ref];
     const pkg = offer?.package?.id ? state[offer.package.id] : null;
-    if (!offer || !pkg || !isNetflixPackage(pkg)) continue;
+    if (!offer || !pkg || !isServicePackage(pkg, service)) continue;
     if (["BUY", "RENT", "CINEMA"].includes(offer.monetizationType)) continue;
     offers.push({
-      provider: pkg.clearName || "Netflix",
+      provider: pkg.clearName || service.name,
       technicalName: pkg.technicalName || "",
       monetizationType: offer.monetizationType,
       presentationType: offer.presentationType,
@@ -408,7 +497,11 @@ function netflixOffersFor(state, object) {
   return offers;
 }
 
-async function scrapeJustWatchCountry(country, selected, canonicalObjectId) {
+function serviceOffersFor(state, object, services) {
+  return Object.fromEntries(services.map((service) => [service.id, offersForService(state, object, service)]));
+}
+
+async function scrapeJustWatchCountry(country, selected, canonicalObjectId, service) {
   const searchUrl = `https://www.justwatch.com/${country.code}/${country.searchPath}?q=${encodeURIComponent(selected.title)}`;
   const html = await fetchText(searchUrl);
   const state = extractApolloState(html);
@@ -421,7 +514,7 @@ async function scrapeJustWatchCountry(country, selected, canonicalObjectId) {
     return { ...country, available: false, matched: false, offers: [], sourceUrl: searchUrl };
   }
 
-  const offers = netflixOffersFor(state, match.object);
+  const offers = offersForService(state, match.object, service);
   return {
     ...country,
     available: offers.length > 0,
@@ -430,6 +523,30 @@ async function scrapeJustWatchCountry(country, selected, canonicalObjectId) {
     fullPath: match.content.fullPath,
     year: match.content.originalReleaseYear || null,
     offers,
+    sourceUrl: match.content.fullPath ? `https://www.justwatch.com${match.content.fullPath}` : searchUrl
+  };
+}
+
+async function scrapeJustWatchCountryForServices(country, selected, canonicalObjectId, services) {
+  const searchUrl = `https://www.justwatch.com/${country.code}/${country.searchPath}?q=${encodeURIComponent(selected.title)}`;
+  const html = await fetchText(searchUrl);
+  const state = extractApolloState(html);
+  if (!state) {
+    throw new Error("No JustWatch state found");
+  }
+
+  const match = findMatchingObject(state, selected, canonicalObjectId);
+  if (!match) {
+    return { ...country, matched: false, serviceOffers: {}, sourceUrl: searchUrl };
+  }
+
+  return {
+    ...country,
+    matched: true,
+    title: match.content.title,
+    fullPath: match.content.fullPath,
+    year: match.content.originalReleaseYear || null,
+    serviceOffers: serviceOffersFor(state, match.object, services),
     sourceUrl: match.content.fullPath ? `https://www.justwatch.com${match.content.fullPath}` : searchUrl
   };
 }
@@ -448,14 +565,10 @@ async function withConcurrency(items, limit, worker) {
 }
 
 async function scanAvailability(selected, countryCodes) {
-  const cacheKey = `availability:${selected.imdbId}:${countryCodes.join(",")}`;
-  const cached = cacheGet(cacheKey);
-  if (cached) return cached;
+  return scanServiceAvailability(selected, countryCodes, DEFAULT_SERVICE);
+}
 
-  const countries = countryCodes.length
-    ? COUNTRIES.filter((country) => countryCodes.includes(country.code))
-    : COUNTRIES;
-
+async function getSeedMetadata(selected, countries) {
   let canonicalObjectId = null;
   let metadata = contentMetadata(null, null, selected);
   try {
@@ -475,10 +588,23 @@ async function scanAvailability(selected, countryCodes) {
   } catch {
     canonicalObjectId = null;
   }
+  return { canonicalObjectId, metadata };
+}
+
+async function scanServiceAvailability(selected, countryCodes, service) {
+  const cacheKey = `availability:${service.id}:${selected.imdbId}:${countryCodes.join(",")}`;
+  const cached = cacheGet(cacheKey);
+  if (cached) return cached;
+
+  const countries = countryCodes.length
+    ? COUNTRIES.filter((country) => countryCodes.includes(country.code))
+    : COUNTRIES;
+
+  const { canonicalObjectId, metadata } = await getSeedMetadata(selected, countries);
 
   const regions = await withConcurrency(countries, 5, async (country) => {
     try {
-      return await scrapeJustWatchCountry(country, selected, canonicalObjectId);
+      return await scrapeJustWatchCountry(country, selected, canonicalObjectId, service);
     } catch (error) {
       return {
         ...country,
@@ -497,6 +623,7 @@ async function scanAvailability(selected, countryCodes) {
   const checked = regions.filter((region) => !region.error).length;
   return cacheSet(cacheKey, {
     selected,
+    service: publicService(service),
     metadata,
     checkedAt: new Date().toISOString(),
     source: "IMDb suggestions + JustWatch regional pages",
@@ -505,6 +632,67 @@ async function scanAvailability(selected, countryCodes) {
     errors: regions.filter((region) => region.error),
     checked,
     total: regions.length
+  });
+}
+
+async function scanAlternativeAvailability(selected, countryCodes) {
+  const cacheKey = `whereelse:${selected.imdbId}:${countryCodes.join(",")}`;
+  const cached = cacheGet(cacheKey);
+  if (cached) return cached;
+
+  const countries = countryCodes.length
+    ? COUNTRIES.filter((country) => countryCodes.includes(country.code))
+    : COUNTRIES;
+
+  const { canonicalObjectId, metadata } = await getSeedMetadata(selected, countries);
+
+  const regions = await withConcurrency(countries, 5, async (country) => {
+    try {
+      return await scrapeJustWatchCountryForServices(country, selected, canonicalObjectId, ALTERNATIVE_SERVICES);
+    } catch (error) {
+      return {
+        ...country,
+        matched: false,
+        serviceOffers: {},
+        error: error.message
+      };
+    }
+  });
+
+  const checked = regions.filter((region) => !region.error).length;
+  const errors = regions.filter((region) => region.error);
+  const serviceResults = ALTERNATIVE_SERVICES.map((service) => {
+    const available = regions
+      .filter((region) => (region.serviceOffers?.[service.id] || []).length > 0)
+      .map((region) => ({
+        ...region,
+        available: true,
+        offers: region.serviceOffers[service.id]
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+
+    return { service, available };
+  });
+
+  const hit = serviceResults.find((result) => result.available.length > 0);
+  const service = hit?.service || ALTERNATIVE_SERVICES[0];
+  const available = hit?.available || [];
+
+  return cacheSet(cacheKey, {
+    selected,
+    service: publicService(service),
+    metadata,
+    checkedAt: new Date().toISOString(),
+    source: "IMDb suggestions + JustWatch regional pages",
+    available,
+    unavailable: regions.filter((region) => region.matched && !region.error && !(region.serviceOffers?.[service.id] || []).length),
+    errors,
+    checked,
+    total: regions.length,
+    alternatives: serviceResults.map((result) => ({
+      service: publicService(result.service),
+      availableCount: result.available.length
+    }))
   });
 }
 
@@ -535,7 +723,27 @@ async function handleApi(req, res, url) {
       .split(",")
       .map((code) => code.trim().toLowerCase())
       .filter(Boolean);
-    return json(res, 200, await scanAvailability(selected, countryCodes));
+    const service = serviceById(cleanQuery(url.searchParams.get("service")) || DEFAULT_SERVICE.id);
+    return json(res, 200, await scanServiceAvailability(selected, countryCodes, service));
+  }
+
+  if (url.pathname === "/api/where-else") {
+    const selected = {
+      imdbId: cleanQuery(url.searchParams.get("imdbId")),
+      title: cleanQuery(url.searchParams.get("title")),
+      year: Number(url.searchParams.get("year")) || null,
+      type: url.searchParams.get("type") === "show" ? "show" : "movie",
+      cast: cleanQuery(url.searchParams.get("cast")),
+      image: String(url.searchParams.get("image") || "").trim().slice(0, 500)
+    };
+    if (!selected.imdbId || !selected.title) {
+      return json(res, 400, { error: "IMDb-ID und Titel fehlen." });
+    }
+    const countryCodes = cleanQuery(url.searchParams.get("countries"))
+      .split(",")
+      .map((code) => code.trim().toLowerCase())
+      .filter(Boolean);
+    return json(res, 200, await scanAlternativeAvailability(selected, countryCodes));
   }
 
   return json(res, 404, { error: "Route nicht gefunden." });

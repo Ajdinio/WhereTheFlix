@@ -21,9 +21,17 @@ let countries = [];
 let selectedCountries = new Set();
 let currentController = null;
 let currentItem = null;
+let currentService = null;
 let currentPosters = [];
 let currentPosterIndex = 0;
 let searchTimer = 0;
+
+const DEFAULT_SERVICE = {
+  id: "netflix",
+  name: "Netflix",
+  accent: "#ff2338",
+  accentRgb: "255, 35, 56"
+};
 
 window.setTimeout(() => {
   appShell.classList.remove("pulse-active");
@@ -51,6 +59,11 @@ function typeText(type) {
 function compactNumber(value) {
   if (!value) return "";
   return new Intl.NumberFormat("de-DE", { notation: "compact" }).format(value);
+}
+
+function applyAccent(service = DEFAULT_SERVICE) {
+  document.documentElement.style.setProperty("--accent", service.accent || DEFAULT_SERVICE.accent);
+  document.documentElement.style.setProperty("--accent-rgb", service.accentRgb || DEFAULT_SERVICE.accentRgb);
 }
 
 async function fetchJson(url, options = {}) {
@@ -113,7 +126,7 @@ function renderSearchResults(results) {
   });
 }
 
-function loadingDetail(item) {
+function loadingDetail(item, label = "Scanning Netflix regions") {
   appShell.classList.add("is-detail");
   searchView.hidden = true;
   detailView.hidden = false;
@@ -123,7 +136,7 @@ function loadingDetail(item) {
         ${item.image ? `<img src="${escapeHtml(item.image)}" alt="">` : ""}
       </div>
       <div>
-        <span class="eyebrow">Scanning Netflix regions</span>
+        <span class="eyebrow">${escapeHtml(label)}</span>
         <h2>${escapeHtml(item.title)}</h2>
         <p>Checking regional catalog pages...</p>
       </div>
@@ -147,8 +160,8 @@ function renderMetaList(meta) {
   return items.map((item) => `<span>${escapeHtml(item)}</span>`).join("");
 }
 
-function regionSummary(regions) {
-  if (!regions.length) return "Not detected on Netflix in the selected regions";
+function regionSummary(regions, service) {
+  if (!regions.length) return `Not detected on ${service.name} in the selected regions`;
   const names = regions.map((region) => region.name);
   if (names.length <= 8) return names.join(", ");
   return `${names.slice(0, 8).join(", ")} +${names.length - 8} more`;
@@ -167,6 +180,9 @@ function renderAvailability(payload) {
   const regions = payload.available || [];
   const errors = payload.errors || [];
   const meta = payload.metadata || payload.selected;
+  const service = payload.service || DEFAULT_SERVICE;
+  currentService = service;
+  applyAccent(service);
   const checkedAt = new Date(payload.checkedAt).toLocaleString("de-DE", {
     dateStyle: "medium",
     timeStyle: "short"
@@ -186,7 +202,10 @@ function renderAvailability(payload) {
         ${currentPosters[0] ? `<img id="detail-poster" src="${escapeHtml(currentPosters[0])}" alt="">` : ""}
       </button>
       <section class="metadata-panel">
-        <span class="eyebrow">${regions.length ? "Available on Netflix" : "No Netflix hit"}</span>
+        <span class="eyebrow availability-eyebrow">
+          <span>${regions.length ? `Available on ${escapeHtml(service.name)}` : service.id === "netflix" ? "No Netflix hit" : `No ${escapeHtml(service.name)} hit`}</span>
+          ${!regions.length && service.id === "netflix" ? `<button class="where-else-button" type="button">Where else?</button>` : ""}
+        </span>
         <h2><a href="${escapeHtml(justWatchUrl)}" target="_blank" rel="noreferrer">${escapeHtml(meta.title || payload.selected.title)}</a></h2>
         <div class="meta-row">${renderMetaList(meta)}</div>
         <p class="description">${escapeHtml(meta.description || "No description found in the regional catalog metadata.")}</p>
@@ -198,32 +217,21 @@ function renderAvailability(payload) {
         </div>
       </section>
       <aside class="availability-card">
-        <span class="eyebrow">Netflix regions</span>
+        <span class="eyebrow">${escapeHtml(service.name)} regions</span>
         <strong>${regions.length ? `${regions.length} region${regions.length === 1 ? "" : "s"}` : "No regions"}</strong>
-        <p>${escapeHtml(regionSummary(regions))}</p>
+        <p>${escapeHtml(regionSummary(regions, service))}</p>
         <div class="region-pills">
           ${regions.slice(0, 12).map((region) => `<a href="${escapeHtml(region.sourceUrl)}" target="_blank" rel="noreferrer">${escapeHtml(region.flag)} ${escapeHtml(region.name)}</a>`).join("")}
         </div>
         <small>${payload.checked} / ${payload.total} checked · ${checkedAt}${errors.length ? ` · ${errors.length} failed` : ""}</small>
-        <small class="data-credit">Data provided by <a href="https://www.imdb.com/" target="_blank" rel="noreferrer">IMDb</a> and <a href="https://www.justwatch.com/" target="_blank" rel="noreferrer">JustWatch</a>. Netflix availability inferred from regional catalog pages.</small>
+        <small class="data-credit">Data provided by <a href="https://www.imdb.com/" target="_blank" rel="noreferrer">IMDb</a> and <a href="https://www.justwatch.com/" target="_blank" rel="noreferrer">JustWatch</a>. Availability inferred from regional catalog pages.</small>
       </aside>
     </div>
   `;
 }
 
-async function scanTitle(item) {
-  if (!selectedCountries.size) {
-    regionDrawer.hidden = false;
-    regionToggle.setAttribute("aria-expanded", "true");
-    return;
-  }
-
-  currentItem = item;
-  if (currentController) currentController.abort();
-  currentController = new AbortController();
-  loadingDetail(item);
-
-  const params = new URLSearchParams({
+function paramsForItem(item) {
+  return new URLSearchParams({
     imdbId: item.imdbId,
     title: item.title,
     year: item.year || "",
@@ -232,9 +240,43 @@ async function scanTitle(item) {
     image: item.image || "",
     countries: [...selectedCountries].join(",")
   });
+}
+
+async function scanTitle(item, service = DEFAULT_SERVICE) {
+  if (!selectedCountries.size) {
+    regionDrawer.hidden = false;
+    regionToggle.setAttribute("aria-expanded", "true");
+    return;
+  }
+
+  currentItem = item;
+  currentService = service;
+  applyAccent(service);
+  if (currentController) currentController.abort();
+  currentController = new AbortController();
+  loadingDetail(item, `Scanning ${service.name} regions`);
+
+  const params = paramsForItem(item);
+  params.set("service", service.id);
 
   try {
     const payload = await fetchJson(`/api/availability?${params}`, { signal: currentController.signal });
+    renderAvailability(payload);
+  } catch (error) {
+    if (error.name === "AbortError") return;
+    detailContent.innerHTML = `<div class="notice detail-notice">Scan failed: ${escapeHtml(error.message)}</div>`;
+  }
+}
+
+async function findWhereElse() {
+  if (!currentItem) return;
+  if (currentController) currentController.abort();
+  currentController = new AbortController();
+  applyAccent(DEFAULT_SERVICE);
+  loadingDetail(currentItem, "Scanning other services");
+
+  try {
+    const payload = await fetchJson(`/api/where-else?${paramsForItem(currentItem)}`, { signal: currentController.signal });
     renderAvailability(payload);
   } catch (error) {
     if (error.name === "AbortError") return;
@@ -282,7 +324,7 @@ regionToggle.addEventListener("click", () => {
 });
 
 rescanButton.addEventListener("click", () => {
-  if (currentItem) scanTitle(currentItem);
+  if (currentItem) scanTitle(currentItem, currentService || DEFAULT_SERVICE);
 });
 
 backButton.addEventListener("click", () => {
@@ -290,6 +332,7 @@ backButton.addEventListener("click", () => {
   appShell.classList.remove("is-detail");
   detailView.hidden = true;
   searchView.hidden = false;
+  applyAccent(DEFAULT_SERVICE);
   input.focus();
 });
 
@@ -302,6 +345,11 @@ closeDisclaimer.addEventListener("click", () => {
 });
 
 detailContent.addEventListener("click", (event) => {
+  if (event.target.closest(".where-else-button")) {
+    findWhereElse();
+    return;
+  }
+
   const posterButton = event.target.closest(".poster-button");
   if (!posterButton || currentPosters.length < 2) return;
   currentPosterIndex = (currentPosterIndex + 1) % currentPosters.length;
