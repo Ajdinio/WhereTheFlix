@@ -20,3 +20,7 @@ WhereTheFlix is not affiliated with, endorsed by, or sponsored by Netflix, IMDb,
 All trademarks, logos, and brand names are the property of their respective owners.
 
 This project does not provide access to streaming content, bypass geographic restrictions, or encourage users to violate any streaming platform's terms of service.
+
+## 1.4 Whats New?
+
+1.4 adds the "Where else?" Option in case of no Netflix hit and scans beyond netflix for the title
