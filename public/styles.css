@@ -496,6 +496,16 @@ a:focus-visible {
   text-transform: inherit;
 }
 
+.availability-link {
+  color: inherit;
+}
+
+.availability-link:hover {
+  text-decoration: underline;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.12em;
+}
+
 .where-else-button:hover {
   text-decoration: underline;
   text-decoration-thickness: 0.08em;
@@ -518,7 +528,14 @@ a:focus-visible {
   text-decoration: none;
 }
 
-.metadata-panel h2 a:hover,
+.metadata-panel h2 a:hover {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.12em;
+}
+
 .facts strong a:hover,
 .data-credit a:hover {
   color: var(--accent);

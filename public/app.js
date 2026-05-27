@@ -176,6 +176,14 @@ function justWatchTitleUrl(meta, regions) {
   return regions[0]?.sourceUrl || "https://www.justwatch.com/";
 }
 
+function providerTitleUrl(regions) {
+  for (const region of regions) {
+    const offer = (region.offers || []).find((item) => item.url);
+    if (offer?.url) return offer.url;
+  }
+  return "";
+}
+
 function renderAvailability(payload) {
   const regions = payload.available || [];
   const errors = payload.errors || [];
@@ -189,6 +197,15 @@ function renderAvailability(payload) {
   });
   const imdbUrl = imdbTitleUrl(payload.selected?.imdbId);
   const justWatchUrl = justWatchTitleUrl(meta, regions);
+  const providerUrl = providerTitleUrl(regions);
+  const availabilityText = regions.length
+    ? `Available on ${service.name}`
+    : service.id === "netflix"
+      ? "No Netflix hit"
+      : `No ${service.name} hit`;
+  const availabilityLabel = regions.length && providerUrl
+    ? `<a class="availability-link" href="${escapeHtml(providerUrl)}" target="_blank" rel="noreferrer">${escapeHtml(availabilityText)}</a>`
+    : `<span>${escapeHtml(availabilityText)}</span>`;
   const rating = meta.imdbScore
     ? `${meta.imdbScore}/10 <a href="${escapeHtml(imdbUrl)}" target="_blank" rel="noreferrer">IMDb</a>${meta.imdbVotes ? ` (${compactNumber(meta.imdbVotes)})` : ""}`
     : `<a href="${escapeHtml(imdbUrl)}" target="_blank" rel="noreferrer">IMDb</a> score unavailable`;
@@ -203,7 +220,7 @@ function renderAvailability(payload) {
       </button>
       <section class="metadata-panel">
         <span class="eyebrow availability-eyebrow">
-          <span>${regions.length ? `Available on ${escapeHtml(service.name)}` : service.id === "netflix" ? "No Netflix hit" : `No ${escapeHtml(service.name)} hit`}</span>
+          ${availabilityLabel}
           ${!regions.length && service.id === "netflix" ? `<button class="where-else-button" type="button">Where else?</button>` : ""}
         </span>
         <h2><a href="${escapeHtml(justWatchUrl)}" target="_blank" rel="noreferrer">${escapeHtml(meta.title || payload.selected.title)}</a></h2>
