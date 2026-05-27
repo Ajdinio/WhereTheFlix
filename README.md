@@ -24,4 +24,4 @@ This project does not provide access to streaming content, bypass geographic res
 ## 1.5 Whats New?
 
 - 1.4 added the "Where else?" Option in case of no Netflix hit and scans beyond netflix for the title
-- 1.5 adds stability and links to the streaming sites
+- 1.5 adds stability and links direclty to the title on the respective streaming sites
