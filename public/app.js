@@ -3,7 +3,6 @@ const searchView = document.querySelector("#search-view");
 const detailView = document.querySelector("#detail-view");
 const detailContent = document.querySelector("#detail-content");
 const form = document.querySelector("#search-form");
-const searchField = document.querySelector(".search-field");
 const input = document.querySelector("#title-input");
 const statusEl = document.querySelector("#status");
 const resultsEl = document.querySelector("#results");
@@ -17,6 +16,9 @@ const backButton = document.querySelector("#back-button");
 const disclaimerButton = document.querySelector("#disclaimer-button");
 const disclaimerDialog = document.querySelector("#disclaimer-dialog");
 const closeDisclaimer = document.querySelector("#close-disclaimer");
+const infoButton = document.querySelector("#info-button");
+const infoDialog = document.querySelector("#info-dialog");
+const closeInfo = document.querySelector("#close-info");
 const viewportMeta = document.querySelector('meta[name="viewport"]');
 
 let countries = [];
@@ -36,13 +38,6 @@ const DEFAULT_SERVICE = {
 };
 
 const mobileMedia = window.matchMedia("(max-width: 900px), (hover: none) and (pointer: coarse)");
-let mobileTooltipTimer = 0;
-
-function positionMobileTooltip() {
-  if (!mobileMedia.matches || !searchField) return;
-  const rect = searchField.getBoundingClientRect();
-  appShell.style.setProperty("--mobile-tooltip-top", `${Math.round(rect.bottom + 10)}px`);
-}
 
 function updateMobileMode() {
   const isMobile = mobileMedia.matches;
@@ -56,21 +51,6 @@ function updateMobileMode() {
         : "width=device-width, initial-scale=1, viewport-fit=cover"
     );
   }
-
-  window.clearTimeout(mobileTooltipTimer);
-  if (isMobile && !appShell.dataset.mobileTooltipShown) {
-    appShell.dataset.mobileTooltipShown = "true";
-    positionMobileTooltip();
-    appShell.classList.add("mobile-tooltip-active");
-    window.requestAnimationFrame(positionMobileTooltip);
-    window.setTimeout(positionMobileTooltip, 1100);
-    mobileTooltipTimer = window.setTimeout(() => {
-      appShell.classList.remove("mobile-tooltip-active");
-    }, 7000);
-    return;
-  }
-
-  appShell.classList.remove("mobile-tooltip-active");
 }
 
 updateMobileMode();
@@ -79,11 +59,6 @@ if (mobileMedia.addEventListener) {
 } else {
   mobileMedia.addListener(updateMobileMode);
 }
-
-window.addEventListener("resize", positionMobileTooltip);
-window.addEventListener("orientationchange", () => {
-  window.setTimeout(positionMobileTooltip, 120);
-});
 
 window.setTimeout(() => {
   appShell.classList.remove("pulse-active");
@@ -411,6 +386,14 @@ disclaimerButton.addEventListener("click", () => {
 
 closeDisclaimer.addEventListener("click", () => {
   disclaimerDialog.close();
+});
+
+infoButton.addEventListener("click", () => {
+  if (mobileMedia.matches) infoDialog.showModal();
+});
+
+closeInfo.addEventListener("click", () => {
+  infoDialog.close();
 });
 
 detailContent.addEventListener("click", (event) => {

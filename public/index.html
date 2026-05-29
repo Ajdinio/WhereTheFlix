@@ -14,7 +14,7 @@
   <body>
     <main class="app-shell pulse-active" id="app-shell">
       <section class="search-view" id="search-view" aria-labelledby="page-title">
-        <h1 id="page-title" aria-label="Where The Flix?">Where The Flix<span class="logo-question-wrap"><span class="logo-question" aria-describedby="logo-tooltip">?</span><span id="logo-tooltip" class="logo-tooltip" role="tooltip">WhereTheFlix helps you check whether a movie or show is available across Netflix regions, beyond your local region lock, so you can see where the title exists even when it does not appear in your own catalog.</span></span></h1>
+        <h1 id="page-title" aria-label="Where The Flix?">Where The Flix<span class="logo-question-wrap"><button id="info-button" class="logo-question-button" type="button" aria-label="About WhereTheFlix" aria-describedby="logo-tooltip"><span class="logo-question">?</span></button><span id="logo-tooltip" class="logo-tooltip" role="tooltip">WhereTheFlix helps you check whether a movie or show is available across Netflix regions, beyond your local region lock, so you can see where the title exists even when it does not appear in your own catalog.</span></span></h1>
         <form id="search-form" class="search-form">
           <label class="visually-hidden" for="title-input">Filmtitel oder Serie</label>
           <div class="search-field">
@@ -47,7 +47,7 @@
         <button id="disclaimer-button" type="button">legal</button>
       </footer>
 
-      <div class="version-counter" aria-label="Version">v1.5.4</div>
+      <div class="version-counter" aria-label="Version">v1.5.5</div>
 
       <dialog id="disclaimer-dialog" class="disclaimer-dialog">
         <button id="close-disclaimer" class="close-disclaimer" type="button" aria-label="Close disclaimer">Close</button>
@@ -55,6 +55,12 @@
         <p>WhereTheFlix is an independent informational tool and is not affiliated with, endorsed by, or sponsored by Netflix, IMDb, JustWatch, or any streaming provider.</p>
         <p>Streaming availability is inferred from third-party sources and may be incomplete, outdated, or vary by account, plan, device, language, and location.</p>
         <p>This service does not provide access to content, bypass regional restrictions, or advise users to violate streaming platform terms. All trademarks and brand names belong to their respective owners.</p>
+      </dialog>
+
+      <dialog id="info-dialog" class="disclaimer-dialog info-dialog">
+        <button id="close-info" class="close-disclaimer" type="button" aria-label="Close information">Close</button>
+        <h2>WhereTheFlix</h2>
+        <p>WhereTheFlix helps you check whether a movie or show is available across Netflix regions, beyond your local region lock, so you can see where the title exists even when it does not appear in your own catalog.</p>
       </dialog>
     </main>
     <script src="/app.js" type="module"></script>
