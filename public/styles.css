@@ -844,8 +844,8 @@ a:focus-visible {
   }
 
   .search-view h1 {
-    max-width: 100%;
-    font-size: clamp(3rem, 13vw, 3.7rem);
+    max-width: none;
+    font-size: clamp(4.1rem, 8.4vw, 7.2rem);
     white-space: nowrap;
   }
 
@@ -857,11 +857,11 @@ a:focus-visible {
 
   .is-mobile.mobile-tooltip-active .logo-tooltip {
     position: fixed;
-    top: calc(env(safe-area-inset-top, 0px) + 82px);
+    top: var(--mobile-tooltip-top, 210px);
     left: 50vw;
     bottom: auto;
-    width: min(330px, calc(100vw - 40px));
-    max-width: calc(100vw - 40px);
+    width: min(360px, calc(100vw - 48px));
+    max-width: calc(100vw - 48px);
     opacity: 1;
     visibility: visible;
     transform: translateX(-50%) translateY(0);
