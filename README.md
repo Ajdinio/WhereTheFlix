@@ -24,3 +24,5 @@ This project does not provide access to streaming content, bypass geographic res
 ## 1.5.6 Whats New?
 
 - optimized the mobile viewport
+- fixed bugs
+- optimized performance
