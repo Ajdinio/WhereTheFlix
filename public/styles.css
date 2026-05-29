@@ -23,6 +23,7 @@
 
 body {
   margin: 0;
+  width: 100%;
   min-height: 100vh;
   overflow-x: hidden;
   overflow-y: auto;
@@ -816,7 +817,9 @@ a:focus-visible {
 @media (max-width: 900px) {
   html,
   body {
+    width: 100%;
     max-width: 100%;
+    overflow-x: hidden;
     overscroll-behavior-x: none;
     touch-action: manipulation;
   }
@@ -830,7 +833,20 @@ a:focus-visible {
     max-width: 100%;
     min-height: 100vh;
     height: auto;
+    overflow-x: clip;
     padding: 18px;
+  }
+
+  .search-view {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  .search-view h1 {
+    max-width: 100%;
+    font-size: clamp(3rem, 13vw, 3.7rem);
+    white-space: nowrap;
   }
 
   .is-mobile .logo-question-wrap:hover .logo-tooltip {
@@ -840,13 +856,29 @@ a:focus-visible {
   }
 
   .is-mobile.mobile-tooltip-active .logo-tooltip {
+    position: fixed;
+    top: calc(env(safe-area-inset-top, 0px) + 82px);
+    left: 50vw;
+    bottom: auto;
+    width: min(330px, calc(100vw - 40px));
+    max-width: calc(100vw - 40px);
     opacity: 1;
     visibility: visible;
     transform: translateX(-50%) translateY(0);
   }
 
+  .is-mobile.mobile-tooltip-active .logo-tooltip::after {
+    display: none;
+  }
+
   .search-view {
     padding-top: clamp(58px, 12vh, 92px);
+  }
+
+  .search-form,
+  .results {
+    width: min(100%, calc(100vw - 36px));
+    max-width: calc(100vw - 36px);
   }
 
   input[type="search"] {
@@ -881,8 +913,9 @@ a:focus-visible {
   .availability-card {
     grid-column: 1 / -1;
     justify-self: center;
-    width: min(100%, 520px);
+    width: min(calc(100% - 12px), 520px);
     min-height: 0;
+    transform: translateX(-8px);
   }
 
   .facts {
