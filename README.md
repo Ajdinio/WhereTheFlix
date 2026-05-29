@@ -21,7 +21,6 @@ All trademarks, logos, and brand names are the property of their respective owne
 
 This project does not provide access to streaming content, bypass geographic restrictions, or encourage users to violate any streaming platform's terms of service.
 
-## 1.5 Whats New?
+## 1.5.6 Whats New?
 
-- 1.4 added the "Where else?" Option in case of no Netflix hit and scans beyond netflix for the title
-- 1.5 adds stability and links direclty to the title on the respective streaming sites
+- optimized the mobile viewport
