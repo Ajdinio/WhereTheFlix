@@ -148,6 +148,12 @@ h1 {
   transform: translateX(-50%) translateY(0);
 }
 
+.mobile-tooltip-active .logo-tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
+
 .search-view > h1,
 .search-form,
 .status,
@@ -522,10 +528,17 @@ a:focus-visible {
 }
 
 .metadata-panel h2 a,
-.facts strong a,
-.data-credit a {
+.facts strong a {
   color: inherit;
   text-decoration: none;
+}
+
+.data-credit a {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 0.08em;
+  text-underline-offset: 0.12em;
 }
 
 .metadata-panel h2 a:hover {
@@ -536,12 +549,15 @@ a:focus-visible {
   text-underline-offset: 0.12em;
 }
 
-.facts strong a:hover,
-.data-credit a:hover {
+.facts strong a:hover {
   color: var(--accent);
   text-decoration: underline;
   text-decoration-thickness: 0.08em;
   text-underline-offset: 0.12em;
+}
+
+.data-credit a:hover {
+  color: inherit;
 }
 
 .meta-row {
@@ -798,23 +814,62 @@ a:focus-visible {
 }
 
 @media (max-width: 900px) {
+  html,
+  body {
+    max-width: 100%;
+    overscroll-behavior-x: none;
+    touch-action: manipulation;
+  }
+
   body {
     overflow: auto;
   }
 
   .app-shell {
+    width: 100%;
+    max-width: 100%;
     min-height: 100vh;
     height: auto;
     padding: 18px;
+  }
+
+  .is-mobile .logo-question-wrap:hover .logo-tooltip {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%) translateY(4px);
+  }
+
+  .is-mobile.mobile-tooltip-active .logo-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
   }
 
   .search-view {
     padding-top: clamp(58px, 12vh, 92px);
   }
 
+  input[type="search"] {
+    font-size: 16px;
+  }
+
   .detail-view {
     height: auto;
     min-height: calc(100vh - 36px);
+  }
+
+  .region-menu {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+  }
+
+  .region-drawer {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    width: min(420px, calc(100vw - 36px));
+    transform: translateX(-50%);
   }
 
   .detail-grid {
@@ -825,6 +880,8 @@ a:focus-visible {
 
   .availability-card {
     grid-column: 1 / -1;
+    justify-self: center;
+    width: min(100%, 520px);
     min-height: 0;
   }
 

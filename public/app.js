@@ -16,6 +16,7 @@ const backButton = document.querySelector("#back-button");
 const disclaimerButton = document.querySelector("#disclaimer-button");
 const disclaimerDialog = document.querySelector("#disclaimer-dialog");
 const closeDisclaimer = document.querySelector("#close-disclaimer");
+const viewportMeta = document.querySelector('meta[name="viewport"]');
 
 let countries = [];
 let selectedCountries = new Set();
@@ -32,6 +33,42 @@ const DEFAULT_SERVICE = {
   accent: "#ff2338",
   accentRgb: "255, 35, 56"
 };
+
+const mobileMedia = window.matchMedia("(max-width: 900px), (hover: none) and (pointer: coarse)");
+let mobileTooltipTimer = 0;
+
+function updateMobileMode() {
+  const isMobile = mobileMedia.matches;
+  appShell.classList.toggle("is-mobile", isMobile);
+
+  if (viewportMeta) {
+    viewportMeta.setAttribute(
+      "content",
+      isMobile
+        ? "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+        : "width=device-width, initial-scale=1, viewport-fit=cover"
+    );
+  }
+
+  window.clearTimeout(mobileTooltipTimer);
+  if (isMobile && !appShell.dataset.mobileTooltipShown) {
+    appShell.dataset.mobileTooltipShown = "true";
+    appShell.classList.add("mobile-tooltip-active");
+    mobileTooltipTimer = window.setTimeout(() => {
+      appShell.classList.remove("mobile-tooltip-active");
+    }, 10000);
+    return;
+  }
+
+  appShell.classList.remove("mobile-tooltip-active");
+}
+
+updateMobileMode();
+if (mobileMedia.addEventListener) {
+  mobileMedia.addEventListener("change", updateMobileMode);
+} else {
+  mobileMedia.addListener(updateMobileMode);
+}
 
 window.setTimeout(() => {
   appShell.classList.remove("pulse-active");
