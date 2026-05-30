@@ -58,7 +58,7 @@ const SERVICES = [
     name: "Prime Video",
     accent: "#0779FF",
     accentRgb: "7, 121, 255",
-    terms: ["amazon prime", "prime video", "amazonprime", "amp"]
+    terms: ["amazon prime", "prime video", "amazonprime", "amazon video", "amazon", "amp", "amz"]
   },
   {
     id: "hulu",
@@ -478,6 +478,12 @@ function isServicePackage(pkg, service) {
   return service.terms.some((term) => haystack.includes(term));
 }
 
+function allowedMonetizationTypes(service) {
+  return service.id === "prime"
+    ? ["FLATRATE", "ADS", "FREE", "RENT"]
+    : ["FLATRATE", "ADS", "FREE"];
+}
+
 function offersForService(state, object, service) {
   const offerRefs = collectOfferRefs(object);
   const offers = [];
@@ -485,7 +491,7 @@ function offersForService(state, object, service) {
     const offer = state[ref];
     const pkg = offer?.package?.id ? state[offer.package.id] : null;
     if (!offer || !pkg || !isServicePackage(pkg, service)) continue;
-    if (["BUY", "RENT", "CINEMA"].includes(offer.monetizationType)) continue;
+    if (!allowedMonetizationTypes(service).includes(offer.monetizationType)) continue;
     offers.push({
       provider: pkg.clearName || service.name,
       technicalName: pkg.technicalName || "",

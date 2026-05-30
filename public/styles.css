@@ -528,6 +528,13 @@ a:focus-visible {
   text-underline-offset: 0.12em;
 }
 
+.service-note {
+  margin: -2px 0 10px;
+  color: #d0c7c0;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
 .metadata-panel h2,
 .detail-loading h2 {
   margin: 0;

@@ -216,6 +216,16 @@ function providerTitleUrl(regions) {
   return "";
 }
 
+function primeAvailabilityNote(service, regions) {
+  if (service.id !== "prime" || !regions.length) return "";
+  const offers = regions.flatMap((region) => region.offers || []);
+  const hasIncluded = offers.some((offer) => ["FLATRATE", "ADS", "FREE"].includes(offer.monetizationType));
+  const hasRent = offers.some((offer) => offer.monetizationType === "RENT");
+  if (hasIncluded) return "Included in subscription";
+  if (hasRent) return "To rent";
+  return "";
+}
+
 function renderAvailability(payload) {
   const regions = payload.available || [];
   const errors = payload.errors || [];
@@ -238,6 +248,7 @@ function renderAvailability(payload) {
   const availabilityLabel = regions.length && providerUrl
     ? `<a class="availability-link" href="${escapeHtml(providerUrl)}" target="_blank" rel="noreferrer">${escapeHtml(availabilityText)}</a>`
     : `<span>${escapeHtml(availabilityText)}</span>`;
+  const serviceNote = primeAvailabilityNote(service, regions);
   const rating = meta.imdbScore
     ? `${meta.imdbScore}/10 <a href="${escapeHtml(imdbUrl)}" target="_blank" rel="noreferrer">IMDb</a>${meta.imdbVotes ? ` (${compactNumber(meta.imdbVotes)})` : ""}`
     : `<a href="${escapeHtml(imdbUrl)}" target="_blank" rel="noreferrer">IMDb</a> score unavailable`;
@@ -255,6 +266,7 @@ function renderAvailability(payload) {
           ${availabilityLabel}
           ${!regions.length && service.id === "netflix" ? `<button class="where-else-button" type="button">Where else?</button>` : ""}
         </span>
+        ${serviceNote ? `<div class="service-note">${escapeHtml(serviceNote)}</div>` : ""}
         <h2><a href="${escapeHtml(justWatchUrl)}" target="_blank" rel="noreferrer">${escapeHtml(meta.title || payload.selected.title)}</a></h2>
         <div class="meta-row">${renderMetaList(meta)}</div>
         <p class="description">${escapeHtml(meta.description || "No description found in the regional catalog metadata.")}</p>
