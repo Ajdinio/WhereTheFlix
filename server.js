@@ -337,7 +337,7 @@ function collectPosterUrls(state, node, depth = 0, seenRefs = new Set()) {
   return urls;
 }
 
-function contentMetadata(state, content, selected) {
+function contentMetadata(state, content, selected, object = null) {
   if (!content) {
     const posters = uniqueImages([selected.image]);
     return {
@@ -372,6 +372,7 @@ function contentMetadata(state, content, selected) {
     year: content.originalReleaseYear || selected.year || null,
     type: selected.type,
     runtime: content.runtime || null,
+    seasonCount: object?.totalSeasonCount || content.totalSeasonCount || null,
     ageCertification: content.ageCertification || "",
     description: content.shortDescription || "",
     genres,
@@ -581,9 +582,9 @@ async function getSeedMetadata(selected, countries) {
       const detailHtml = await fetchText(`https://www.justwatch.com${seedMatch.content.fullPath}`);
       const detailState = extractApolloState(detailHtml);
       const detailMatch = detailState ? findMatchingObject(detailState, selected, canonicalObjectId) : null;
-      metadata = contentMetadata(detailState, detailMatch?.content || seedMatch.content, selected);
+      metadata = contentMetadata(detailState, detailMatch?.content || seedMatch.content, selected, detailMatch?.object || seedMatch.object);
     } else if (seedMatch?.content) {
-      metadata = contentMetadata(seedState, seedMatch.content, selected);
+      metadata = contentMetadata(seedState, seedMatch.content, selected, seedMatch.object);
     }
   } catch {
     canonicalObjectId = null;

@@ -173,15 +173,20 @@ function loadingDetail(item, label = "Scanning Netflix regions") {
 }
 
 function formatRuntime(minutes, type) {
-  if (!minutes) return type === "show" ? "Episode runtime unknown" : "Runtime unknown";
-  return type === "show" ? `${minutes} min episodes` : `${minutes} min`;
+  if (!minutes) return "Runtime unknown";
+  return `${minutes} min`;
+}
+
+function formatSeasonCount(count) {
+  if (!count) return "Seasons unknown";
+  return `${count} season${count === 1 ? "" : "s"}`;
 }
 
 function renderMetaList(meta) {
   const items = [
     meta.year,
     typeText(meta.type),
-    formatRuntime(meta.runtime, meta.type),
+    meta.type === "show" ? formatSeasonCount(meta.seasonCount) : formatRuntime(meta.runtime, meta.type),
     meta.ageCertification
   ].filter(Boolean);
   return items.map((item) => `<span>${escapeHtml(item)}</span>`).join("");
