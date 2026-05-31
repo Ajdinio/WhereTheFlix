@@ -21,7 +21,7 @@ All trademarks, logos, and brand names are the property of their respective owne
 
 This project does not provide access to streaming content, bypass geographic restrictions, or encourage users to violate any streaming platform's terms of service.
 
-## 1.5.7 Whats New?
+## 1.5.8 Whats New?
 
 - optimized the mobile viewport
 - fixed bugs
